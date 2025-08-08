@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Video Downloader</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    input[type="text"] { width: 60%; padding: 10px; font-size: 16px; }
+    select, button { padding: 10px; font-size: 16px; margin: 10px; }
+  </style>
+</head>
+<body>
+  <h1>YouTube Video Downloader</h1>
+  <input type="text" id="url" placeholder="Enter YouTube URL">
+  <button onclick="fetchInfo()">Get Info</button>
+
+  <div id="videoInfo" style="display:none">
+    <h2 id="title"></h2>
+    <select id="format"></select>
+    <button onclick="downloadVideo()">Download</button>
+  </div>
+
+  <script>
+    async function fetchInfo() {
+      const url = document.getElementById('url').value;
+      const res = await fetch(`/info?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      if (data.error) return alert(data.error);
+
+      document.getElementById('title').innerText = data.title;
+      const formatDropdown = document.getElementById('format');
+      formatDropdown.innerHTML = '';
+      data.formats.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.itag;
+        opt.text = f.qualityLabel;
+        formatDropdown.appendChild(opt);
+      });
+      document.getElementById('videoInfo').style.display = 'block';
+    }
+
+    function downloadVideo() {
+      const url = document.getElementById('url').value;
+      const itag = document.getElementById('format').value;
+      window.location.href = `/download?url=${encodeURIComponent(url)}&itag=${itag}`;
+    }
+  </script>
+</body>
+</html>
